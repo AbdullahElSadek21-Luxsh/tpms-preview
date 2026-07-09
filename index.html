@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>TPMS Prototype — Version Previews</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 640px; margin: 60px auto; padding: 0 22px; line-height: 1.5; }
+    h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+    p.sub { color: #667085; margin-top: 0; }
+    a.ver { display: block; padding: 16px 18px; margin: 12px 0; border: 1px solid #d0d5dd; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color .15s, background .15s; }
+    a.ver:hover { border-color: #1f6bf2; background: rgba(31,107,242,.05); }
+    a.ver b { display: block; font-size: 1.05rem; }
+    a.ver span { color: #667085; font-size: .9rem; }
+    .apps { margin-top: 6px; font-size: .85rem; color: #667085; }
+    footer { margin-top: 40px; color: #98a2b3; font-size: .8rem; }
+  </style>
+</head>
+<body>
+  <h1>Third Party Management System (TPMS)</h1>
+  <p class="sub">Prototype previews — select a version</p>
+
+  <a class="ver" href="./v3/">
+    <b>V.3 — CC26-0435</b>
+    <span>Inventory QC status &amp; Expired, HHT TPMS Pickup, WSC Recieve Inventory, WMS dispatch gating, system rename</span>
+    <div class="apps">Portal · <a href="./v3/hht.html">HHT</a> · <a href="./v3/wsc.html">WSC</a></div>
+  </a>
+
+  <!-- Add new versions here as they are released, e.g.:
+  <a class="ver" href="./v4/"><b>V.4 — CC26-XXXX</b><span>…</span></a>
+  -->
+
+  <footer>Internal prototype for development reference. Not a production system.</footer>
+</body>
+</html>
