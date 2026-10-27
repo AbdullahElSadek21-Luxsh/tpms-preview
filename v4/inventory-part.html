@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inventory Part</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #b8c4d1;
+    font-family: "Segoe UI", Tahoma, "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    color: #000;
+    user-select: none;
+  }
+
+  .page-nav {
+    width: 1160px;
+    margin: 10px auto 0 auto;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #ece9d8;
+    border: 1px solid #6a6a6a;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    box-sizing: border-box;
+  }
+  .page-nav a {
+    display: inline-block;
+    min-width: 110px;
+    padding: 4px 10px;
+    color: #000;
+    text-decoration: none;
+    text-align: center;
+    background: #d4d0c8;
+    border: 1px solid #404040;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    font-weight: bold;
+  }
+  .page-nav a.active {
+    background: #b7cbe4;
+  }
+
+  /* Window chrome */
+  .window {
+    width: 1160px;
+    margin: 20px auto;
+    background: #f5f4ec;
+    border: 1px solid #6a6a6a;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    box-sizing: border-box;
+  }
+  .titlebar {
+    background: linear-gradient(to bottom, #d8e4f3 0%, #c2d4ea 50%, #b7cbe4 100%);
+    color: #000;
+    font-weight: bold;
+    padding: 3px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #8a9bb8;
+  }
+  .titlebar .controls span {
+    display: inline-block;
+    width: 18px; height: 16px;
+    background: #d4d0c8;
+    border: 1px solid #000;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    color: #000;
+    text-align: center;
+    line-height: 14px;
+    margin-left: 2px;
+    font-family: Marlett, sans-serif;
+    font-size: 10px;
+  }
+
+  /* Group box */
+  fieldset.group {
+    border: 1px solid #808080;
+    box-shadow: 1px 1px 0 #fff;
+    margin: 8px;
+    padding: 8px 10px 10px 10px;
+    background: transparent;
+  }
+  fieldset.group > legend {
+    padding: 0 4px;
+    font-weight: normal;
+    color: #000;
+  }
+
+  /* Rows / columns */
+  .row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .field label {
+    width: 155px;
+    text-align: left;
+    padding-right: 6px;
+    flex-shrink: 0;
+  }
+  .field label.short { width: 100px; }
+  .field label.tiny  { width: 80px; }
+
+  /* Inputs — lavender Windows-Forms style */
+  input[type="text"], select {
+    background: #c8c8f0;
+    border: 1px solid #7a7a7a;
+    box-shadow: 1px 1px 0 #808080 inset, -1px -1px 0 #fff inset;
+    height: 18px;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 1px 3px;
+    color: #000;
+    box-sizing: border-box;
+  }
+  input.num { text-align: right; }
+  input.code { width: 55px; flex-shrink: 0; }
+  input.medium { width: 115px; flex-shrink: 0; }
+  input.long { width: 220px; }
+  input.xlong { width: 320px; }
+  input.desc { width: 560px; }
+  select { background: #c8c8f0; min-width: 130px; }
+  select.medium { width: 150px; flex-shrink: 0; }
+
+  /* Bordered group inside Sales section */
+  .salesgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px 20px;
+  }
+
+  /* Tables */
+  table.grid {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    table-layout: fixed;
+  }
+  table.grid th {
+    background: #d4d0c8;
+    border: 1px solid #808080;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px;
+    font-size: 10px;
+    color: #000;
+  }
+  table.grid td {
+    border: 1px solid #c0c0c0;
+    height: 18px;
+    padding: 0;
+  }
+  table.grid td.rowmark {
+    width: 18px;
+    background: #ece9d8;
+    text-align: center;
+    color: #808080;
+  }
+  table.grid tr.selected td.rowmark {
+    background: #316ac5;
+    color: #fff;
+  }
+  table.grid td.editing {
+    background: #316ac5;
+  }
+  table.grid input {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    font-size: 10px;
+    padding: 1px 2px;
+  }
+
+  /* Checkboxes */
+  .check {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 12px;
+  }
+  .check input { margin: 0 4px 0 0; }
+
+  /* Buttons (classic Windows raised) */
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 8px 10px 10px 10px;
+  }
+  button.win {
+    background: #ece9d8;
+    border: 1px solid #404040;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 14px 4px 28px;
+    min-width: 84px;
+    height: 32px;
+    position: relative;
+    cursor: pointer;
+    color: #000;
+  }
+  button.win:active {
+    box-shadow: -1px -1px 0 #fff inset, 1px 1px 0 #808080 inset;
+  }
+  button.win::before {
+    content: "";
+    position: absolute;
+    left: 6px; top: 50%;
+    transform: translateY(-50%);
+    width: 18px; height: 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  button.clear::before { content: "🧹"; font-size: 14px; }
+  button.remove::before { content: "❌"; font-size: 12px; }
+  button.copy::before  { content: "📋"; font-size: 14px; }
+  button.add::before   { content: "➕"; font-size: 12px; }
+  button.save::before  { content: "💾"; font-size: 14px; }
+
+  /* R417: the Brand Owner / BO Service Fee row beneath the three columns, as the live screen lays it out. */
+  #ownerFeeRow { display: flex; gap: 0 40px; margin-top: 8px; }
+  #ownerFeeRow #customerRow .combo input { width: 300px; }
+  #ownerFeeRow #customerRow label { width: 100px; }
+  #ownerFeeRow #serviceFeeRow label { width: 110px; }
+  #ownerFeeRow .fee-source { left: 232px; }
+  /* Customer row stays visible, then unlocks once the CBPM product family is selected */
+  #customerRow { display: flex; }
+  /* R417: both labels carry their asterisk always, as the live screen does - greyed with the field while it is locked. */
+  #customerRow label::after,
+  #serviceFeeRow label::after {
+    content: " *";
+  }
+  #customerRow.locked label {
+    color: #777;
+  }
+  #customerRow.locked .combo input,
+  .combo input:disabled {
+    background: #d4d0c8;
+    color: #777;
+    cursor: not-allowed;
+  }
+  #customerRow.locked .combo .arrow {
+    color: #777;
+    cursor: not-allowed;
+  }
+  /* Service Fee unlocks only once a Brand Owner has been selected */
+  #serviceFeeRow { display: flex; position: relative; }
+  #serviceFeeRow.locked label {
+    color: #777;
+  }
+  #serviceFeeRow input:disabled {
+    background: #d4d0c8;
+    color: #777;
+    cursor: not-allowed;
+  }
+  /* Taken out of flow so the varying text cannot re-flow the column widths. */
+  .fee-source {
+    position: absolute;
+    left: 282px;
+    top: 3px;
+    font-size: 10px;
+    color: #666;
+    white-space: nowrap;
+  }
+  .fee-source.modified { color: #a05000; font-weight: bold; }
+
+  input.invalid, select.invalid {
+    border-color: #c00;
+    box-shadow: 0 0 0 1px #c00;
+  }
+
+  /* Searchable dropdown */
+  .combo {
+    position: relative;
+    display: inline-block;
+  }
+  .combo input {
+    width: 195px;
+    padding-right: 18px;
+  }
+  .combo .arrow {
+    position: absolute;
+    right: 1px; top: 1px;
+    width: 16px; height: 14px;
+    background: #d4d0c8;
+    border-left: 1px solid #7a7a7a;
+    text-align: center;
+    line-height: 14px;
+    font-size: 9px;
+    cursor: pointer;
+  }
+  .combo .list {
+    position: absolute;
+    left: 0; top: 18px;
+    width: 250px;
+    max-height: 160px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #7a7a7a;
+    z-index: 20;
+    display: none;
+  }
+  .combo .list div {
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .combo .list div:hover,
+  .combo .list div.active { background: #316ac5; color: #fff; }
+  .combo.open .list { display: block; }
+
+  /* Validation message box */
+  .lookup-btn {
+    margin-left: 2px;
+    width: 20px; height: 18px;
+    background: #d4d0c8;
+    border: 1px solid #000;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    font-size: 10px; line-height: 10px; padding: 0; cursor: pointer;
+  }
+  .pf-box { width: 560px; }
+  .pf-tools { padding: 6px; display: flex; gap: 6px; align-items: center; }
+  .pf-scroll { max-height: 260px; overflow-y: auto; border: 1px solid #808080; margin: 0 6px 6px; background: #fff; }
+  .pf-scroll table { width: 100%; border-collapse: collapse; }
+  .pf-scroll th {
+    background: #e8e8e8; border-bottom: 1px solid #808080; text-align: left;
+    padding: 2px 6px; font-weight: normal; position: sticky; top: 0;
+  }
+  .pf-scroll td { padding: 2px 6px; color: #0a3d91; white-space: nowrap; }
+  .pf-scroll tr { cursor: pointer; }
+  .pf-scroll tr:hover td { background: #e8f0fb; }
+  .pf-scroll tr.sel td { background: #0a58ca; color: #fff; }
+  .msg-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .msg-overlay.open { display: flex; }
+  .msg-box {
+    width: 430px;
+    background: #f5f4ec;
+    border: 1px solid #6a6a6a;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.4), 1px 1px 0 #fff inset;
+  }
+  .msg-title {
+    background: linear-gradient(to bottom, #d8e4f3 0%, #c2d4ea 50%, #b7cbe4 100%);
+    border-bottom: 1px solid #8a9bb8;
+    padding: 3px 6px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .msg-title button {
+    width: 18px; height: 16px;
+    background: #d4d0c8;
+    border: 1px solid #000;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    font-size: 10px;
+    line-height: 12px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .msg-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px 16px;
+  }
+  .msg-icon {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    line-height: 32px;
+    text-align: center;
+    font-size: 26px;
+  }
+  .msg-text { font-size: 11px; line-height: 1.5; padding-top: 4px; }
+  .msg-footer {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 16px 14px 16px;
+  }
+  .msg-footer button {
+    background: #ece9d8;
+    border: 1px solid #404040;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 0;
+    width: 88px;
+    cursor: pointer;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 3px;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  #toast.show { opacity: 0.95; }
+</style>
+</head>
+<body>
+
+<!--
+  R209, 28.08.2026 - the `Make To Stock` tab is removed.
+
+  It linked to `make-to-stock.html`, which DOES NOT EXIST in this repository, so it was a dead
+  link: clicking it produced a 404. It was one of the items HANDOVER lists as "seen on screen and
+  in NO record" - taken from the live WSC and mocked up here, never entered in the register, never
+  specified in the URS, FS or DS.
+
+  The nav strip is kept with its one remaining tab rather than deleted. It is what marks this as a
+  WSC screen with a tab bar above the window chrome, and DS Figures 4.1.4 to 4.1.9 are captures of
+  this page with that strip in place.
+-->
+<nav class="page-nav" aria-label="Main navigation">
+  <a href="inventory-part.html" class="active">Inventory Part</a>
+</nav>
+
+<div class="window">
+  <div class="titlebar">
+    <span>Inventory Part</span>
+    <span class="controls">
+      <span>0</span><span>1</span><span>r</span>
+    </span>
+  </div>
+
+  <!-- Search -->
+  <fieldset class="group">
+    <legend>Search</legend>
+    <div class="row">
+      <label style="width:90px; text-align:right; padding-right:6px;">Inventory Part</label>
+      <input type="text" id="partNo" class="medium" maxlength="40" style="width:160px;">
+      <label style="width:90px; text-align:right; padding-right:6px;">Part Description</label>
+      <input type="text" id="partDesc" class="desc" style="width:400px;">
+      <label style="width:30px; text-align:right; padding-right:6px;">Site</label>
+      <input type="text" id="site" style="width:120px;">
+    </div>
+  </fieldset>
+
+  <!-- Three-column attribute area -->
+  <fieldset class="group" style="padding-top:6px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 2px 18px;">
+      <!-- Column 1 -->
+      <div>
+        <div class="field"><label>Part Type :</label>
+          <!-- R417: the live screen's list. A 3PL part is Purchased (finished goods) or Purchased (raw) (raw material) - a
+               stated procedure, not enforced here. -->
+          <select class="medium" id="partType">
+            <option>Manufactured</option><option>Manufactured Recipe</option><option>Purchased (raw)</option>
+            <option selected>Purchased</option><option>Expense</option>
+          </select>
+        </div>
+        <div class="field"><label>UoM :</label>
+          <input type="text" class="code" id="uomCode">
+          <input type="text" class="medium" id="uomDesc" style="margin-left:2px;">
+        </div>
+        <div class="field"><label>Part Status :</label>
+          <input type="text" class="code" id="statusCode" value="A">
+          <input type="text" class="medium" id="statusDesc" style="margin-left:2px;">
+        </div>
+        <div class="field"><label>Estimated Material Cost :</label>
+          <input type="text" class="num medium" id="estCost" value="0">
+        </div>
+        <div class="field"><label>Unit Cost :</label>
+          <input type="text" class="num medium" id="unitCost" value="0">
+        </div>
+        <div class="field"><label>Inventory Valuation Method :</label>
+          <select class="medium" id="valMethod">
+            <option>Weighted Average</option><option>Standard Cost</option><option>FIFO</option>
+          </select>
+        </div>
+        <div class="field"><label>Part Country :</label>
+          <input type="text" class="code" id="countryCode">
+          <input type="text" class="medium" id="countryDesc" style="margin-left:2px;">
+        </div>
+        <div class="field"><label>Product Code :</label>
+          <input type="text" class="code" id="prodCode">
+          <input type="text" class="medium" id="prodCodeDesc" style="margin-left:2px;">
+        </div>
+      </div>
+
+      <!-- Column 2 -->
+      <div>
+        <div class="field"><label>Product Family :</label>
+          <input type="text" class="code" id="prodFamily" readonly>
+          <input type="text" class="medium" id="prodFamilyDesc" style="margin-left:2px;" readonly>
+          <button type="button" class="lookup-btn" id="prodFamilyBtn" title="Select Product Family">...</button>
+        </div>
+        <div class="field"><label>Created :</label>
+          <input type="text" class="medium" id="created">
+          <span class="check" style="margin-left:6px;"><input type="checkbox" id="note">Note</span>
+        </div>
+        <div class="field"><label>Lot/Batch Tracking :</label>
+          <select class="medium" id="lotTrack">
+            <option>Lot Tracking</option><option>No Lot Tracking</option>
+          </select>
+        </div>
+        <div class="field"><label>Lot Quantity Rule :</label>
+          <select class="medium" id="lotQty">
+            <option>One Lot Per Production Order</option><option>Many Lots</option>
+          </select>
+        </div>
+        <div class="field"><label>Sub Lot Rule :</label>
+          <select class="medium" id="subLot">
+            <option>No Sub Lots Allowed</option><option>Sub Lots Allowed</option>
+          </select>
+        </div>
+        <div class="field"><label>On Hand Qty :</label>
+          <input type="text" class="num medium" id="onHand">
+        </div>
+        <div class="field"><label>Total Qty Perivale :</label>
+          <input type="text" class="num medium" id="qtyPerivale">
+        </div>
+        <div class="field"><label>Total Qty Newcastle :</label>
+          <input type="text" class="num medium" id="qtyNewcastle">
+        </div>
+      </div>
+
+      <!-- Column 3 -->
+      <div>
+        <div class="field"><label>Inventory Part Cost Level</label>
+          <select class="medium" id="costLevel">
+            <option>Cost Per Part</option><option>Cost Per Lot</option>
+          </select>
+        </div>
+        <div class="field"><label>Invoice Consideration</label>
+          <select class="medium" id="invCons">
+            <option>Ignore Invoice Price</option><option>Use Invoice Price</option>
+          </select>
+        </div>
+        <div class="field"><label>Zero Cost Flag</label>
+          <select class="medium" id="zeroCost">
+            <option>Zero Cost Forbidden</option><option>Zero Cost Allowed</option>
+          </select>
+        </div>
+        <div class="field"><label>Average Purchase Price :</label>
+          <input type="text" class="num medium" id="avgPrice">
+        </div>
+        <div class="field"><label>Hidden Qty :</label>
+          <input type="text" class="num medium" id="hiddenQty">
+        </div>
+        <div class="field"><label>Component Lot Rule :</label>
+          <select class="medium" id="compLot">
+            <option>Many Lots Allowed</option><option>One Lot Only</option>
+          </select>
+        </div>
+        <!-- R417: two fields the live screen carries (Abdallah's screenshot, 26.10.2026). -->
+        <div class="field"><label>Controlled Drug :</label>
+          <select class="medium" id="controlledDrug">
+            <option></option><option>YES</option><option>NO</option>
+          </select>
+        </div>
+        <div class="field"><label>Storage Conditions :</label>
+          <select id="storageConditions" style="width:200px; flex-shrink:0;">
+            <option></option><option>Freezing Line: -2°C to +2°C</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- R417: Brand Owner and BO Service Fee on a row of their own beneath the three columns, as the live screen has them. -->
+    <div id="ownerFeeRow">
+      <!-- Brand Owner: greyed out until the CBPM product family is selected -->
+      <div class="field" id="customerRow">
+        <label>Brand Owner :</label>
+        <div class="combo" id="customerCombo">
+          <input type="text" id="customer" autocomplete="off" placeholder="Select Brand Owner">
+          <span class="arrow">▼</span>
+          <div class="list" id="customerList"></div>
+        </div>
+      </div>
+
+      <!-- BO Service Fee: per-unit rate for this SKU, defaulted from the Brand Owner -->
+      <div class="field" id="serviceFeeRow">
+        <label>BO Service Fee :</label>
+        <input type="text" class="num medium" id="serviceFee" maxlength="12">
+        <span class="fee-source" id="feeSource"></span>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- Revisions -->
+  <fieldset class="group">
+    <legend>Revisions</legend>
+    <table class="grid" id="revGrid">
+      <colgroup>
+        <col style="width:22px"><col><col><col><col><col><col><col><col>
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th>
+          <th>REVISION</th><th>PHASE IN</th><th>PHASE OUT</th>
+          <th>REVISION<br>TEXT</th><th>PRODUCT<br>STATUS</th>
+          <th>REPAIR<br>STATUS</th><th>ENG REV</th><th>ENG REV<br>DESC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="rowmark"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="selected"><td class="rowmark">*</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </fieldset>
+
+  <!-- Default Location -->
+  <fieldset class="group">
+    <legend>Default Location</legend>
+    <table class="grid" id="locGrid">
+      <colgroup>
+        <col style="width:22px"><col><col><col><col><col><col><col><col>
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th>
+          <th>LOCATION_NO</th><th>LOCATION_TYPE</th><th>LOCATION_GROU</th>
+          <th>WAREHOUSE</th><th>BAY_NO</th><th>ROW_NO</th><th>TIER_NO</th><th>BIN_NO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="selected"><td class="rowmark">▶</td>
+          <td class="editing"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </fieldset>
+
+  <!-- Sales Part Details -->
+  <fieldset class="group">
+    <legend>Sales Part Details</legend>
+    <div class="salesgrid">
+      <!-- Column 1 -->
+      <div>
+        <div class="field"><label class="short">Price:</label>
+          <input type="text" class="num medium" id="price" value="0.00">
+        </div>
+        <div class="field"><label class="short">Min Selling Price :</label>
+          <input type="text" class="num medium" id="minPrice" value="0">
+        </div>
+        <div class="field"><label class="short">Trade Price :</label>
+          <input type="text" class="num medium" id="tradePrice" value="0.00">
+        </div>
+      </div>
+
+      <!-- Column 2 -->
+      <div>
+        <div class="field">
+          <span class="check"><input type="checkbox" id="taxable">Taxable</span>
+          <span class="check"><input type="checkbox" id="active" checked>Active</span>
+        </div>
+        <div class="field"><label class="tiny">Tax Code :</label>
+          <input type="text" class="code" id="taxCode" value="SUK-11">
+        </div>
+        <div class="field"><label class="tiny">Sales Group :</label>
+          <input type="text" class="code" id="salesGroup">
+          <input type="text" class="medium" id="salesGroupDesc" style="margin-left:2px;">
+        </div>
+
+        <div class="field"><label class="tiny">Aerosol :</label>
+          <select id="aerosol"><option>SELECT</option><option>Yes</option><option>No</option></select>
+        </div>
+      </div>
+
+      <!-- Column 3 -->
+      <div>
+        <div class="field"><span class="check"><input type="checkbox" id="easy">Easy</span></div>
+        <div class="field"><span class="check"><input type="checkbox" id="medium" checked>Medium</span></div>
+        <div class="field"><span class="check"><input type="checkbox" id="hard">Hard</span></div>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="button-row">
+    <button class="win clear" id="btnClear">Clear</button>
+    <button class="win remove" id="btnRemove">Remove</button>
+    <button class="win copy" id="btnCopy">Copy</button>
+    <button class="win add" id="btnAdd">Add</button>
+    <button class="win save" id="btnSave">Save</button>
+  </div>
+</div>
+
+<div class="msg-overlay" id="pfOverlay" aria-hidden="true">
+  <div class="msg-box pf-box" role="dialog" aria-modal="true" aria-labelledby="pfTitle">
+    <div class="msg-title">
+      <span id="pfTitle">Select Product Family</span>
+      <button type="button" id="pfClose" aria-label="Close">x</button>
+    </div>
+    <div class="pf-tools">
+      <input type="text" id="pfSearch" style="flex:1;" placeholder="Search code or description...">
+      <button type="button" id="pfClear">Clear</button>
+    </div>
+    <div class="pf-scroll">
+      <table>
+        <thead><tr><th style="width:110px;">PART_PRODUCT_FAMILY</th><th>DESCRIPTION</th></tr></thead>
+        <tbody id="pfRows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="msg-overlay" id="msgOverlay" aria-hidden="true">
+  <div class="msg-box" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
+    <div class="msg-title">
+      <span id="msgTitle">Inventory Part</span>
+      <button type="button" id="msgClose" aria-label="Close">x</button>
+    </div>
+    <div class="msg-body">
+      <span class="msg-icon">⚠️</span>
+      <span class="msg-text" id="msgText"></span>
+    </div>
+    <div class="msg-footer">
+      <button type="button" id="msgOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // -------- Brand Owner master (mock — replace with API call in real impl) --------
+  //
+  // THESE ARE THE ONBOARDED BRAND OWNERS, AND ONLY THOSE. FS 4.1 says it in four places - "The
+  // Brand Owner is selected from the Brand Owners onboarded to the platform... A Brand Owner that
+  // has not been onboarded is not offered for selection." This list used to hold C0001-C0008, which
+  // is the set of companies the backend has provisioned and NOBODY has onboarded: the exact inverse
+  // of the rule, and no overlap at all with the Brand Owners the console shows (audit of
+  // 29.08.2026, finding 6). C0004 also carried a second name, "GreenLeaf Holdings", for a company
+  // the service calls Greenleaf Pharma.
+  //
+  // It must agree with the onboarded vendors in `dataService` - number, name and all. Two
+  // hardcoded copies of one master is how it drifted, so `wsc-brand-owner-master.cjs` now fails
+  // the build if they disagree rather than waiting for the next audit.
+  //
+  // defaultRate = the Brand Owner's default per-unit service fee held in the back end,
+  // maintained by IT on a documented Business Development instruction. null = none set.
+  const CUSTOMERS = [
+    { no: "C0004", name: "Greenleaf Pharma",   defaultRate: 5.25 },
+    { no: "C0009", name: "Mamedica",           defaultRate: 6.00 },
+    { no: "C0010", name: "Northwind Extracts", defaultRate: null },
+  ];
+
+  // Logged-in user — in the real system this comes from the WSC session.
+  const CURRENT_USER = "A.ELSADEK";
+
+  // R417 (Abdallah, 26.10.2026): "the BO Service fee should be able to leave it as zero ... no negative amount tho".
+  // The fee may be zero; a negative is refused by the format check below. Was a minimum of 0.01.
+  const MIN_FEE = 0;
+
+  // -------- DOM refs --------
+  const partNoEl   = document.getElementById('partNo');
+  const prodFamilyEl = document.getElementById('prodFamily');
+  const partDescEl = document.getElementById('partDesc');
+  const customerRow= document.getElementById('customerRow');
+  const customerEl = document.getElementById('customer');
+  const customerCombo = document.getElementById('customerCombo');
+  const customerList  = document.getElementById('customerList');
+  const arrowEl    = customerCombo.querySelector('.arrow');
+  const serviceFeeRow = document.getElementById('serviceFeeRow');
+  const serviceFeeEl  = document.getElementById('serviceFee');
+  const feeSourceEl   = document.getElementById('feeSource');
+
+  // Track selected customer (record persisted on save)
+  let selectedCustomer = null;       // { no, name, defaultRate } | null
+  let lastAppliedPrefix = null;      // tracks the prefix currently in partDesc so we can swap it
+  let lastConfirmedOwner = null;     // survives mid-typing, drives the fee-follows-default rule
+
+
+  // -------- Product Family master --------
+  // Taken from the live lookup. CBPM is the new family this project adds: selecting it is what
+  // declares a part as cannabis, and it is the ONLY thing that unlocks Brand Owner and the
+  // service fee. Nothing keys off the part number.
+  const FAMILIES = [
+    { code: "CBPM",  desc: "Cannabis-Based Product for Medicinal Use" },
+    { code: "COPIL", desc: "PI Comp PIL ONLY" },
+    { code: "HPS1",  desc: "SOR Hospital Products (Wales)" },
+    { code: "FGAW",  desc: "Amdipharm - Waymade F G" },
+    { code: "BATCH", desc: "Batch Charges" },
+    { code: "INLIC", desc: "In Licencing" },
+    { code: "CD2",   desc: "Control Drug Schedule2" },
+    { code: "CD4",   desc: "Control Drug Schedule4" },
+    { code: "UKS",   desc: "UK" },
+    { code: "8001",  desc: "Colorama DNP (Finished)" },
+    { code: "RET",   desc: "Retail Product" },
+    { code: "GENPI", desc: "Generic to PI" },
+    { code: "CDGPI", desc: "Control Drug - Generic PI" },
+    { code: "LICCD", desc: "Licensed CD" },
+  ];
+
+  const pfOverlay = document.getElementById('pfOverlay');
+  const pfRows    = document.getElementById('pfRows');
+  const pfSearch  = document.getElementById('pfSearch');
+
+  function pfRender(filter) {
+    const q = (filter || '').toLowerCase();
+    const rows = FAMILIES.filter(f =>
+      f.code.toLowerCase().includes(q) || f.desc.toLowerCase().includes(q));
+    pfRows.innerHTML = rows.map(f =>
+      `<tr data-code="${f.code}"><td>${f.code}</td><td>${f.desc}</td></tr>`).join('');
+  }
+  function pfOpen() {
+    pfSearch.value = '';
+    pfRender('');
+    pfOverlay.classList.add('open');
+    pfOverlay.setAttribute('aria-hidden', 'false');
+    pfSearch.focus();
+  }
+  function pfClose() {
+    pfOverlay.classList.remove('open');
+    pfOverlay.setAttribute('aria-hidden', 'true');
+  }
+  function pfPick(code) {
+    const f = FAMILIES.find(x => x.code === code);
+    if (!f) return;
+    prodFamilyEl.value = f.code;
+    document.getElementById('prodFamilyDesc').value = f.desc;
+    pfClose();
+    // The family IS the trigger, so both dependants re-evaluate the moment it changes.
+    refreshCustomerVisibility();
+    refreshServiceFee();
+  }
+  document.getElementById('prodFamilyBtn').addEventListener('click', pfOpen);
+  document.getElementById('pfClose').addEventListener('click', pfClose);
+  document.getElementById('pfClear').addEventListener('click', () => {
+    prodFamilyEl.value = '';
+    document.getElementById('prodFamilyDesc').value = '';
+    pfClose();
+    refreshCustomerVisibility();
+    refreshServiceFee();
+  });
+  pfSearch.addEventListener('input', () => pfRender(pfSearch.value));
+  pfRows.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr');
+    if (tr) pfPick(tr.getAttribute('data-code'));
+  });
+  pfOverlay.addEventListener('click', (e) => { if (e.target === pfOverlay) pfClose(); });
+
+  // -------- CBPM unlock rule --------
+  function isCbpm() {
+    return (prodFamilyEl.value || '').trim().toUpperCase() === 'CBPM';
+  }
+  function refreshCustomerVisibility() {
+    if (isCbpm()) {
+      customerEl.disabled = false;
+      customerCombo.classList.remove('disabled');
+      customerRow.classList.remove('locked');
+      customerRow.classList.add('required');
+    } else {
+      customerEl.disabled = true;
+      customerCombo.classList.remove('open');
+      customerCombo.classList.add('disabled');
+      customerRow.classList.add('locked');
+      customerRow.classList.remove('required');
+      // clear any prefix that was applied while the rule was active
+      if (lastAppliedPrefix && partDescEl.value.startsWith(lastAppliedPrefix)) {
+        partDescEl.value = partDescEl.value.slice(lastAppliedPrefix.length);
+      }
+      selectedCustomer = null;
+      customerEl.value = '';
+      lastAppliedPrefix = null;
+      customerEl.classList.remove('invalid');
+      serviceFeeEl.value = '';
+      serviceFeeEl.classList.remove('invalid');
+      lastConfirmedOwner = null;
+    }
+    refreshServiceFee();
+  }
+  // Nothing listens to the part number any more: the CBPM product family is the only trigger,
+  // and the lookup calls the refreshers itself when it sets one.
+
+  // -------- BO Service Fee --------
+  function fmtFee(n) { return Number(n).toFixed(2); }
+
+  // A Brand Owner may legitimately have no default rate held against it.
+  function hasDefault(owner) {
+    return !!owner && owner.defaultRate !== null && owner.defaultRate !== undefined;
+  }
+
+  // The fee is only enterable once a Brand Owner is held against the SKU.
+  function refreshServiceFee() {
+    const enabled = isCbpm() && !!selectedCustomer;
+    serviceFeeEl.disabled = !enabled;
+    serviceFeeRow.classList.toggle('locked', !enabled);
+    serviceFeeRow.classList.toggle('required', enabled);
+    if (!enabled) serviceFeeEl.classList.remove('invalid');
+    refreshFeeSource();
+  }
+
+  // Shows whether the value on screen is the Brand Owner default or an amendment to it.
+  function refreshFeeSource() {
+    if (!isCbpm() || !selectedCustomer) { feeSourceEl.textContent = ''; feeSourceEl.className = 'fee-source'; return; }
+    const def = selectedCustomer.defaultRate;
+    const val = (serviceFeeEl.value || '').trim();
+    if (!hasDefault(selectedCustomer)) {
+      feeSourceEl.textContent = 'NA';
+      feeSourceEl.className = 'fee-source';
+    } else if (val === fmtFee(def)) {
+      feeSourceEl.textContent = 'Brand Owner default';
+      feeSourceEl.className = 'fee-source';
+    } else {
+      feeSourceEl.textContent = 'amended (default ' + fmtFee(def) + ')';
+      feeSourceEl.className = 'fee-source modified';
+    }
+  }
+
+  // Reject anything that is not a plain positive number as it is typed.
+  serviceFeeEl.addEventListener('input', () => {
+    let v = serviceFeeEl.value.replace(/[^0-9.]/g, '');
+    const firstDot = v.indexOf('.');
+    if (firstDot !== -1) v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
+    if (firstDot !== -1) v = v.slice(0, firstDot + 3);
+    serviceFeeEl.value = v;
+    serviceFeeEl.classList.remove('invalid');
+    refreshFeeSource();
+  });
+
+  serviceFeeEl.addEventListener('blur', () => {
+    const v = (serviceFeeEl.value || '').trim();
+    if (v !== '' && /^\d*\.?\d*$/.test(v) && v !== '.') serviceFeeEl.value = fmtFee(parseFloat(v));
+    refreshFeeSource();
+  });
+
+  function validateFee() {
+    const v = (serviceFeeEl.value || '').trim();
+    if (v === '') return 'BO Service Fee is mandatory for CBPM parts. A CBPM part cannot be saved without a service fee.';
+    if (!/^\d+(\.\d{1,2})?$/.test(v)) return 'BO Service Fee must be a number to a maximum of 2 decimal places. Letters and negative values are not accepted.';
+    return null;
+  }
+
+  // -------- Searchable customer dropdown --------
+  function renderList(filter) {
+    const q = (filter || '').toLowerCase();
+    const matches = CUSTOMERS.filter(c =>
+      c.name.toLowerCase().includes(q) || c.no.toLowerCase().includes(q)
+    );
+    customerList.innerHTML = matches.length
+      ? matches.map(c => `<div data-no="${c.no}" data-name="${c.name}">${c.no} &nbsp; ${c.name}</div>`).join('')
+      : '<div style="color:#888; cursor:default;">No matches</div>';
+    customerList.querySelectorAll('div[data-no]').forEach(d => {
+      d.addEventListener('mousedown', e => {
+        e.preventDefault();
+        // Always pass the master record, so the default rate travels with the selection.
+        const owner = CUSTOMERS.find(c => c.no === d.dataset.no);
+        if (owner) selectCustomer(owner);
+        closeCombo();
+      });
+    });
+  }
+  function openCombo()  {
+    if (customerEl.disabled) return;
+    customerCombo.classList.add('open');
+    renderList(customerEl.value);
+  }
+  function closeCombo() { customerCombo.classList.remove('open'); }
+
+  customerEl.addEventListener('focus', openCombo);
+  customerEl.addEventListener('blur', () => setTimeout(closeCombo, 120));
+  customerEl.addEventListener('input', () => {
+    openCombo();
+    renderList(customerEl.value);
+    // typing invalidates the selection until they pick again
+    selectedCustomer = null;
+    refreshServiceFee();
+  });
+  arrowEl.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if (customerEl.disabled) return;
+    customerEl.focus();
+    if (customerCombo.classList.contains('open')) closeCombo();
+    else openCombo();
+  });
+
+  function selectCustomer(c) {
+    // The fee follows the new Brand Owner's default only where the value on screen is
+    // still the previous owner's default (or blank). A fee amended away from the
+    // default is a deliberate SKU rate and is left as it is.
+    const currentFee = (serviceFeeEl.value || '').trim();
+    const stillAtDefault = currentFee === '' ||
+      (hasDefault(lastConfirmedOwner) && currentFee === fmtFee(lastConfirmedOwner.defaultRate));
+
+    selectedCustomer = c;
+    lastConfirmedOwner = c;
+    customerEl.value = c.name;
+    customerEl.classList.remove('invalid');
+
+    if (stillAtDefault) {
+      serviceFeeEl.value = hasDefault(c) ? fmtFee(c.defaultRate) : '';
+      serviceFeeEl.classList.remove('invalid');
+    }
+    refreshServiceFee();
+
+    // Auto-prefix Part Description with "<CustomerName> - "
+    const newPrefix = c.name + ' - ';
+    let desc = partDescEl.value || '';
+    if (lastAppliedPrefix && desc.startsWith(lastAppliedPrefix)) {
+      desc = desc.slice(lastAppliedPrefix.length);
+    }
+    partDescEl.value = newPrefix + desc;
+    lastAppliedPrefix = newPrefix;
+  }
+
+  // -------- Validation message box --------
+  const msgOverlay = document.getElementById('msgOverlay');
+  const msgText    = document.getElementById('msgText');
+  let msgFocusTarget = null;
+
+  function showMessage(text, focusEl) {
+    msgText.textContent = text;
+    msgFocusTarget = focusEl || null;
+    msgOverlay.classList.add('open');
+    msgOverlay.setAttribute('aria-hidden', 'false');
+    document.getElementById('msgOk').focus();
+  }
+  function closeMessage() {
+    msgOverlay.classList.remove('open');
+    msgOverlay.setAttribute('aria-hidden', 'true');
+    if (msgFocusTarget) msgFocusTarget.focus();
+  }
+  document.getElementById('msgOk').addEventListener('click', closeMessage);
+  document.getElementById('msgClose').addEventListener('click', closeMessage);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && msgOverlay.classList.contains('open')) closeMessage();
+  });
+
+  // -------- Save / validation --------
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // Audit entry for every action introduced by this change (user, action, timestamp).
+  function audit(partNo, action, from, to) {
+    const log = JSON.parse(localStorage.getItem('serviceChargeAudit') || '[]');
+    log.push({ partNo, action, from, to, user: CURRENT_USER, timestamp: new Date().toISOString() });
+    localStorage.setItem('serviceChargeAudit', JSON.stringify(log));
+    console.log('AUDIT:', action, partNo, from, '->', to, CURRENT_USER);
+  }
+
+  document.getElementById('btnSave').addEventListener('click', () => {
+    if (isCbpm() && !selectedCustomer) {
+      customerEl.classList.add('invalid');
+      showMessage('Brand Owner is mandatory for CBPM parts. Please select a Brand Owner before saving.', customerEl);
+      return;
+    }
+
+    if (isCbpm()) {
+      const feeError = validateFee();
+      if (feeError) {
+        serviceFeeEl.classList.add('invalid');
+        showMessage(feeError, serviceFeeEl);
+        return;
+      }
+      serviceFeeEl.value = fmtFee(parseFloat(serviceFeeEl.value));
+    }
+
+    const store = JSON.parse(localStorage.getItem('inventoryParts') || '{}');
+    const partNo = partNoEl.value;
+    const existing = store[partNo] || null;
+
+    const record = {
+      partNo:      partNo,
+      description: partDescEl.value,
+      site:        document.getElementById('site').value,
+      salesGroup:  document.getElementById('salesGroup').value,
+      customerNo:  selectedCustomer ? selectedCustomer.no : null,
+      customerName: selectedCustomer ? selectedCustomer.name : null,
+      serviceFee:  isCbpm() ? serviceFeeEl.value : null,
+      createdBy:   existing ? existing.createdBy : CURRENT_USER,
+      createdOn:   existing ? existing.createdOn : new Date().toISOString(),
+      amendedBy:   existing ? CURRENT_USER : null,
+      amendedOn:   existing ? new Date().toISOString() : null,
+      // ...other fields would be collected here
+    };
+
+    // The part creator is recorded and remains accountable for the Service Fee;
+    // every subsequent amendment is captured against the user who made it.
+    if (!existing) {
+      audit(partNo, 'Part created', null, record.customerName + ' @ ' + record.serviceFee);
+    } else {
+      if (existing.customerName !== record.customerName) {
+        audit(partNo, 'Brand Owner amended', existing.customerName, record.customerName);
+      }
+      if (existing.serviceFee !== record.serviceFee) {
+        audit(partNo, 'Service Fee amended', existing.serviceFee, record.serviceFee);
+      }
+    }
+
+    // Persist for downstream service-charge invoicing.
+    // In a real IFS impl this would POST to INVENTORY_PART_API.Modify__ or a custom projection.
+    store[partNo] = record;
+    localStorage.setItem('inventoryParts', JSON.stringify(store));
+
+    toast('Saved. Brand Owner ' + (record.customerName || '(none)') +
+          (record.serviceFee ? ' at ' + record.serviceFee + '/unit' : '') +
+          ' linked to ' + (partNo || '(no part)'));
+    console.log('Saved record:', record);
+  });
+
+  document.getElementById('btnClear').addEventListener('click', () => {
+    document.querySelectorAll('input[type=text]').forEach(i => {
+      if (i.id === 'statusCode') i.value = 'A';
+      else if (['price','tradePrice'].includes(i.id)) i.value = '0.00';
+      else if (['estCost','unitCost','minPrice'].includes(i.id)) i.value = '0';
+      else if (i.id === 'taxCode') i.value = 'SUK-11';
+      else i.value = '';
+    });
+    selectedCustomer = null;
+    lastAppliedPrefix = null;
+    refreshCustomerVisibility();
+  });
+
+  // No-op handlers so the buttons feel alive
+  ['btnRemove','btnCopy','btnAdd'].forEach(id =>
+    document.getElementById(id).addEventListener('click', () => toast(id.replace('btn','') + ' clicked'))
+  );
+
+  // Initial state
+  refreshCustomerVisibility();
+</script>
+</body>
+</html>
